@@ -7,6 +7,49 @@ use Sprint\Migration\Helper;
 class EventHelper extends Helper
 {
 
+
+    public function getEventType($eventName) {
+        $filter = is_array($eventName) ? $eventName : array(
+            'TYPE_ID' => $eventName,
+        );
+
+        $dbres = \CEventType::GetList($filter);
+        return $dbres->Fetch();
+    }
+
+    public function getEventTypes($eventName) {
+        $filter = is_array($eventName) ? $eventName : array(
+            'TYPE_ID' => $eventName,
+        );
+
+        $dbres = \CEventType::GetList($filter);
+        return $this->fetchAll($dbres);
+    }
+
+    public function getEventMessage($eventName) {
+        $filter = is_array($eventName) ? $eventName : array(
+            'TYPE_ID' => $eventName,
+        );
+
+        $by = 'id';
+        $order = 'asc';
+
+        $dbres = \CEventMessage::GetList($by, $order, $filter);
+        return $dbres->Fetch();
+    }
+
+    public function getEventMessages($eventName) {
+        $filter = is_array($eventName) ? $eventName : array(
+            'TYPE_ID' => $eventName,
+        );
+
+        $by = 'id';
+        $order = 'asc';
+
+        $dbres = \CEventMessage::GetList($by, $order, $filter);
+        return $this->fetchAll($dbres);
+    }
+
     /**
      * @param $eventName
      * @param $fields array(), key LID = language id
@@ -16,24 +59,113 @@ class EventHelper extends Helper
     public function addEventTypeIfNotExists($eventName, $fields) {
         $this->checkRequiredKeys(__METHOD__, $fields, array('LID'));
 
-        /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-        $aItem = \CEventType::GetList(array(
+        $item = $this->getEventType(array(
             'TYPE_ID' => $eventName,
             'LID' => $fields['LID']
-        ))->Fetch();
+        ));
 
-        if ($aItem) {
-            return $aItem['ID'];
+        if ($item) {
+            return $item['ID'];
         }
 
-        $default = array(
-            "LID" => $fields['LID'],
-            "EVENT_NAME" => 'event_name',
-            "NAME" => 'NAME',
-            "DESCRIPTION" => 'description',
-        );
+        return $this->addEventType($eventName, $fields);
+    }
 
-        $fields = array_replace_recursive($default, $fields);
+
+    /**
+     * @param $eventName
+     * @param $fields array(), key LID = site id
+     * @return int
+     * @throws \Sprint\Migration\Exceptions\HelperException
+     */
+    public function addEventMessageIfNotExists($eventName, $fields) {
+        $this->checkRequiredKeys(__METHOD__, $fields, array('SUBJECT', 'LID'));
+
+        $item = $this->getEventMessage(array(
+            'TYPE_ID' => $eventName,
+            'SUBJECT' => $fields['SUBJECT'],
+        ));
+
+        if ($item) {
+            return $item['ID'];
+        }
+
+        return $this->addEventMessage($eventName, $fields);
+    }
+
+
+    public function updateEventMessage($eventName, $fields) {
+        $items = $this->getEventMessages($eventName);
+
+        foreach ($items as $item) {
+            $this->updateEventMessageById($item["ID"], $fields);
+        }
+
+        return true;
+    }
+
+    public function updateEventMessageById($id, $fields) {
+        $event = new \CEventMessage;
+        if ($event->Update($id, $fields)) {
+            return $id;
+        }
+
+        $this->throwException(__METHOD__, $event->LAST_ERROR);
+    }
+
+    public function updateEventTypeById($id, $fields) {
+        $event = new \CEventType();
+        if ($event->Update(array('ID' => $id), $fields)) {
+            return $id;
+        }
+
+        $this->throwException(__METHOD__, 'event type not updated');
+    }
+
+    //version 2
+
+    public function saveEventMessage($eventName, $fields) {
+        $this->checkRequiredKeys(__METHOD__, $fields, array('SUBJECT', 'LID'));
+
+        $item = $this->getEventMessage(array(
+            'TYPE_ID' => $eventName,
+            'SUBJECT' => $fields['SUBJECT'],
+        ));
+
+        $fields['EVENT_NAME'] = $eventName;
+
+        if ($item) {
+            return $this->updateEventMessageById($item['ID'], $fields);
+        } else {
+            return $this->addEventMessage($eventName, $fields);
+        }
+    }
+
+    public function saveEventType($eventName, $fields) {
+        $this->checkRequiredKeys(__METHOD__, $fields, array('LID'));
+
+        $item = $this->getEventType(array(
+            'TYPE_ID' => $eventName,
+            'LID' => $fields['LID']
+        ));
+
+        if ($item) {
+            return $this->updateEventTypeById($item['ID'], $fields);
+        } else {
+            return $this->addEventType($eventName, $fields);
+        }
+
+    }
+
+
+    /** @deprecated */
+    public function updateEventMessageByFilter($filter, $fields) {
+        return $this->updateEventMessage($filter, $fields);
+    }
+
+
+    public function addEventType($eventName, $fields) {
+        $this->checkRequiredKeys(__METHOD__, $fields, array('LID', 'NAME'));
         $fields['EVENT_NAME'] = $eventName;
 
         $event = new \CEventType;
@@ -47,39 +179,19 @@ class EventHelper extends Helper
     }
 
 
-    /**
-     * @param $eventName
-     * @param $fields array(), key LID = site id
-     * @return int
-     * @throws \Sprint\Migration\Exceptions\HelperException
-     */
-    public function addEventMessageIfNotExists($eventName, $fields) {
-        $this->checkRequiredKeys(__METHOD__, $fields, array('SUBJECT', 'LID'));
-
-        $by = 'id';
-        $order = 'asc';
-        /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-        $aItem = \CEventMessage::GetList($by, $order, array(
-            'TYPE_ID' => $eventName,
-            'SUBJECT' => $fields['SUBJECT']
-        ))->Fetch();
-
-        if ($aItem) {
-            return $aItem['ID'];
-        }
+    public function addEventMessage($eventName, $fields) {
+        $this->checkRequiredKeys(__METHOD__, $fields, array('LID', 'SUBJECT'));
 
         $default = array(
             'ACTIVE' => 'Y',
-            'LID' => 's1',
             'EMAIL_FROM' => '#DEFAULT_EMAIL_FROM#',
             'EMAIL_TO' => '#EMAIL_TO#',
             'BCC' => '',
-            'SUBJECT' => 'subject',
             'BODY_TYPE' => 'text',
-            'MESSAGE' => 'message',
+            'MESSAGE' => '',
         );
 
-        $fields = array_replace_recursive($default, $fields);
+        $fields = array_merge($default, $fields);
         $fields['EVENT_NAME'] = $eventName;
 
         $event = new \CEventMessage;
@@ -91,48 +203,4 @@ class EventHelper extends Helper
 
         $this->throwException(__METHOD__, 'Event message %s not added, error: %s', $eventName, $event->LAST_ERROR);
     }
-
-    /**
-     * @param $eventName
-     * @param $fields
-     * @return bool|int
-     * @deprecated use addEventTypeIfNotExists
-     */
-    public function addEventType($eventName, $fields) {
-        return $this->addEventTypeIfNotExists($eventName, $fields);
-    }
-
-
-    /**
-     * @param $eventName
-     * @param $fields
-     * @return bool|int
-     * @deprecated use addEventMessageIfNotExists
-     */
-    public function addEventMessage($eventName, $fields) {
-        return $this->addEventMessageIfNotExists($eventName, $fields);
-    }
-
-    public function updateEventMessageByFilter($filter, $fields) {
-
-        $by = "site_id";
-        $order = "desc";
-
-        /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-        $dbRes = \CEventMessage::GetList($by, $order, $filter);
-
-        while ($aItem = $dbRes->getNext()) {
-            $event = new \CEventMessage;
-            if (!$event->Update($aItem["ID"], $fields)) {
-                $this->throwException(__METHOD__, $event->LAST_ERROR);
-            }
-        }
-
-        return true;
-    }
-
-    public function updateEventMessage($eventName, $fields) {
-        return $this->updateEventMessageByFilter(array('TYPE_ID' => $eventName), $fields);
-    }
-
 }

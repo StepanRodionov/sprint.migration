@@ -14,8 +14,11 @@ abstract class AbstractBuilder
     /** @var VersionConfig */
     private $versionConfig = null;
 
-    private $title = '';
-    private $description = '';
+    private $info = array(
+        'title' => '',
+        'description' => '',
+        'group' => 'default',
+    );
 
     private $fields = array();
 
@@ -24,6 +27,9 @@ abstract class AbstractBuilder
     private $execStatus = '';
 
     private $enabled = false;
+
+
+    private $actions = array();
 
     protected function initialize() {
         //your code
@@ -70,9 +76,15 @@ abstract class AbstractBuilder
     }
 
     protected function addField($code, $param = array()) {
+        if (isset($param['multiple']) && $param['multiple']) {
+            $value = array();
+        } else {
+            $value = '';
+        }
+
         $param = array_merge(array(
             'title' => '',
-            'value' => '',
+            'value' => $value,
             'bind' => 0
         ), $param);
 
@@ -253,24 +265,8 @@ abstract class AbstractBuilder
         }
     }
 
-    protected function setTitle($title = '') {
-        $this->title = $title;
-    }
-
-    protected function setDescription($description = '') {
-        $this->description = $description;
-    }
-
     public function getName() {
         return $this->name;
-    }
-
-    public function getTitle() {
-        return $this->title;
-    }
-
-    public function getDescription() {
-        return $this->description;
     }
 
     public function getFields() {
@@ -297,6 +293,44 @@ abstract class AbstractBuilder
         call_user_func_array(array('Sprint\Migration\Out', 'outError'), $args);
     }
 
+    protected function redirect($url) {
+        $this->actions[] = array(
+            'type' => 'redirect',
+            'url' => $url
+        );
+    }
+
+    public function hasActions() {
+        return !empty($this->actions);
+    }
+
+    public function getActions() {
+        return $this->actions;
+    }
+
+    protected function setTitle($title = '') {
+        $this->info['title'] = $title;
+    }
+
+    protected function setDescription($description = '') {
+        $this->info['description'] = $description;
+    }
+
+    protected function setGroup($group = '') {
+        $this->info['group'] = $group;
+    }
+
+    public function getTitle() {
+        return $this->info['title'];
+    }
+
+    public function getDescription() {
+        return $this->info['description'];
+    }
+
+    public function getGroup() {
+        return $this->info['group'];
+    }
 
     /** @deprecated */
     protected function requiredField($code, $param = array()) {

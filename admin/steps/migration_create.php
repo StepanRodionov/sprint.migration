@@ -32,13 +32,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $hasSteps && check_bitrix_sessid('se
         if ($builder->isRestart()) {
             $json = json_encode($builder->getRestartParams());
             ?><script>migrationBuilder(<?=$json?>);</script><?
+
+        } elseif ($builder->isRebuild()){
+            ?><script>migrationEnableButtons(1);</script><?
+
+        } elseif ($builder->hasActions()){
+            $actions = $builder->getActions();
+            foreach ($actions as $action) {
+                if ($action['type'] == 'redirect') {
+                    ?><script>window.location.replace("<?=$action['url']?>");</script><?
+                }
+            }
+
         } else {
-            ?><script>migrationMigrationRefresh();</script><?
+            ?><script>
+                migrationMigrationRefresh(function () {
+                    migrationScrollList();
+                    migrationEnableButtons(1);
+                });
+            </script><?
         }
+    }
 
-    } else {
+
+    if ($_POST["step_code"] == "migration_reset") {
         $builder->renderHtml();
-
         ?><script>migrationMigrationRefresh();</script><?
     }
 

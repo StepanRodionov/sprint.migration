@@ -82,6 +82,10 @@
     "SPRINT_MIGRATION_BUILDER_TransferEmptyDest" => "Укажите конфигурацию для перемещения",
     "SPRINT_MIGRATION_BUILDER_TransferBadDest" => "Укажите подходящую конфигурацию",
 
+    "SPRINT_MIGRATION_BUILDER_EventExport1" => "Создать миграцию для почтовых событий",
+    "SPRINT_MIGRATION_BUILDER_EventExport2" => "",
+    "SPRINT_MIGRATION_BUILDER_EventExport_event_types" => "Выберите типы почтовых событий",
+
     "SPRINT_MIGRATION_BUILDER_AgentExport1" => "Создать миграцию для агентов",
     "SPRINT_MIGRATION_BUILDER_AgentExport2" => "",
     "SPRINT_MIGRATION_BUILDER_AgentExport_agent_id" => "Выберите агенты",
@@ -117,8 +121,21 @@
     "SPRINT_MIGRATION_BUILDER_UserTypeEntities2" => "",
     "SPRINT_MIGRATION_BUILDER_UserTypeEntities_EntityId" => "Укажите поле для выгрузки",
 
+    "SPRINT_MIGRATION_BUILDER_FormExport1" => "Создать миграцию для веб-формы",
+    "SPRINT_MIGRATION_BUILDER_FormExport2" => "",
+    "SPRINT_MIGRATION_BUILDER_FormExport_FormId" => "Выберите форму",
+    "SPRINT_MIGRATION_BUILDER_FormExport_What" => "Что переносим?",
+    "SPRINT_MIGRATION_BUILDER_FormExport_Form" => "Форму",
+    "SPRINT_MIGRATION_BUILDER_FormExport_Fields" => "Поля формы",
+    "SPRINT_MIGRATION_BUILDER_FormExport_Statuses" => "Статусы",
+
     "SPRINT_MIGRATION_BUILDER_CacheCleaner1" => "Очистка кеша",
     "SPRINT_MIGRATION_BUILDER_CacheCleaner2" => "Выполнить BXClearCache(true)",
+
+    "SPRINT_MIGRATION_BUILDER_Cleaner" => "Удалить конфигурацию",
+    "SPRINT_MIGRATION_BUILDER_Cleaner_desc" => "Удаление файла конфигурации, файлов миграций и записей в таблице миграций",
+    "SPRINT_MIGRATION_BUILDER_Cleaner_config_name" => "Выберите конфигурацию",
+    "SPRINT_MIGRATION_BUILDER_Cleaner_config_error" => "Ошибка удаления конфигурации",
 
     "SPRINT_MIGRATION_GOTO_MIGRATION" => "Перейти в админку миграций",
     "SPRINT_MIGRATION_REMOVE_OPTIONS" => "Сбросить настройки модуля",

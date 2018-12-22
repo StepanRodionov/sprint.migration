@@ -51,16 +51,16 @@ class VersionConfig
         return (isset($this->configList[$configName]));
     }
 
-    public function getName() {
-        return $this->configCurrent['name'];
-    }
-
-    public function getCurrent() {
-        return $this->configCurrent;
+    public function getCurrent($key = false) {
+        return ($key) ? $this->configCurrent[$key] : $this->configCurrent;
     }
 
     public function getList() {
         return $this->configList;
+    }
+
+    public function getName() {
+        return $this->getCurrent('name');
     }
 
     protected function searchConfigs() {
@@ -189,35 +189,21 @@ class VersionConfig
     }
 
     public function getVal($name, $default = '') {
-        if (isset($this->configCurrent['values'][$name])) {
-            if (is_bool($this->configCurrent['values'][$name])) {
-                return $this->configCurrent['values'][$name];
-            } elseif (!empty($this->configCurrent['values'][$name])) {
-                return $this->configCurrent['values'][$name];
+        $values = $this->getCurrent('values');
+
+        if (isset($values[$name])) {
+            if (is_bool($values[$name])) {
+                return $values[$name];
+            } elseif (!empty($values[$name])) {
+                return $values[$name];
             }
         }
 
         return $default;
     }
 
-    public function createConfig($configName, $configValues = array()) {
-        if (isset($this->configList[$configName])) {
-            $curValues = $this->configList[$configName]['values'];
-            $defaultValues = array(
-                'migration_dir' => $this->getRelativeDir($curValues['migration_dir']),
-                'migration_table' => $curValues['migration_table'],
-            );
-        } else {
-            $defaultValues = array(
-                'migration_dir' => $this->getArchiveDir($configName),
-                'migration_table' => 'sprint_migration_' . $configName,
-            );
-        }
-
-        $configValues = array_merge($defaultValues, $configValues);
-
+    public function createConfig($configName) {
         $fileName = 'migrations.' . $configName . '.php';
-
         if (!$this->getConfigName($fileName)) {
             return false;
         }
@@ -227,8 +213,43 @@ class VersionConfig
             return false;
         }
 
+        if (isset($this->configList[$configName])) {
+            $curValues = $this->configList[$configName]['values'];
+            $configValues = array(
+                'migration_dir' => $this->getRelativeDir($curValues['migration_dir']),
+                'migration_table' => $curValues['migration_table'],
+            );
+        } else {
+            $configValues = array(
+                'migration_dir' => $this->getArchiveDir($configName),
+                'migration_table' => 'sprint_migration_' . $configName,
+            );
+        }
+
         file_put_contents($configPath, '<?php return ' . var_export($configValues, 1) . ';');
         return is_file($configPath);
+    }
+
+    public function deleteConfig($configName) {
+        $fileName = 'migrations.' . $configName . '.php';
+        if (!$this->getConfigName($fileName)) {
+            return false;
+        }
+
+        if (!isset($this->configList[$configName])) {
+            return false;
+        }
+
+        $configFile = $this->configList[$configName]['file'];
+
+        $vmFrom = new VersionManager($configName);
+        $vmFrom->clean();
+
+        if (!empty($configFile) && is_file($configFile)) {
+            unlink($configFile);
+        }
+
+        return true;
     }
 
     protected function getRelativeDir($dir) {
@@ -267,10 +288,13 @@ class VersionConfig
             'UserTypeEntities' => '\Sprint\Migration\Builders\UserTypeEntities',
             'UserGroupExport' => '\Sprint\Migration\Builders\UserGroupExport',
             'AgentExport' => '\Sprint\Migration\Builders\AgentExport',
+            'FormExport' => '\Sprint\Migration\Builders\FormExport',
+            'EventExport' => '\Sprint\Migration\Builders\EventExport',
+            'CacheCleaner' => '\Sprint\Migration\Builders\CacheCleaner',
             'Marker' => '\Sprint\Migration\Builders\Marker',
             'Transfer' => '\Sprint\Migration\Builders\Transfer',
             'Configurator' => '\Sprint\Migration\Builders\Configurator',
-            'CacheCleaner' => '\Sprint\Migration\Builders\CacheCleaner',
+            'Cleaner' => '\Sprint\Migration\Builders\Cleaner',
         );
     }
 

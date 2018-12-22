@@ -1,11 +1,8 @@
-
 .sp-block {
     background-color: #f5f9f9;
     border: 1px solid;
     border-color: #c4ced2 #dce7ed #dce7ed;
-    padding: 19px;
-    /*width: 33%;*/
-    /*float: left;*/
+    padding: 15px;
 }
 
 .sp-block:after {
@@ -14,16 +11,41 @@
     clear: both;
 }
 
-.sp-block_body {
+.sp-block .sp-block_body {
     display: none;
 }
 
-.sp-block_head {
+.sp-block.sp-white,
+.sp-block.sp-active {
+    background: #fff;
+}
+
+.sp-block.sp-active .sp-block_body {
+    display: inline;
+}
+
+.sp-block-scroll {
+    padding-right: 0;
+}
+
+.sp-scroll {
+    overflow-x: auto;
+    overflow-y: scroll;
+    max-height: 425px;
+}
+
+
+.sp-noblock_body {
+    display: block;
+}
+
+.sp-noblock_title {
     color: #000;
     font-size: 20px;
     position: relative;
     min-height: 25px;
 }
+
 .sp-block_title {
     color: #000;
     font-size: 20px;
@@ -32,6 +54,44 @@
     cursor: pointer;
 }
 
+.sp-group {
+    display: table;
+    width: 100%;
+}
+
+.sp-separator {
+    display: block;
+    padding: 10px;
+}
+
+.sp-group .sp-group-row1,
+.sp-group .sp-group-row2,
+.sp-group .sp-group-row3 {
+    display: table-row;
+}
+
+.sp-group .sp-group-row1 .sp-block {
+    display: table-cell;
+    vertical-align: top;
+    width: 100%;
+}
+
+.sp-group .sp-group-row2 .sp-block {
+    display: table-cell;
+    vertical-align: top;
+    width: 50%;
+    /*float: left;*/
+    /*width: 350px;*/
+}
+
+.sp-group .sp-group-row3 .sp-block {
+    display: table-cell;
+    vertical-align: top;
+    /*float: left;*/
+    width: 33%;
+}
+
+.sp-group:after,
 .sp-clear:after {
     content: '';
     display: block;
@@ -44,21 +104,6 @@
     /*padding: 10px;*/
 
     float: right;
-}
-
-.sp-table {
-    display: table;
-    border-collapse: collapse;
-    width: 100%;
-}
-
-.sp-table .sp-row {
-    display: table-row;
-}
-
-.sp-table .sp-col {
-    display: table-cell;
-    vertical-align: top;
 }
 
 table.sp-config {
@@ -83,16 +128,16 @@ table.sp-list {
 }
 
 table.sp-list td.sp-list-l {
-    width: 110px;
     vertical-align: middle;
     text-align: left;
-    padding: 5px 5px 5px 0;
+    padding: 5px 0;
+    width: 105px;
 }
 
 table.sp-list td.sp-list-r {
     vertical-align: middle;
     text-align: left;
-    padding: 5px 0 5px 5px;
+    padding: 5px 0;
 }
 
 table.sp-status {
@@ -156,7 +201,8 @@ a.sp-item-unknown:visited {
     color: #555;
     border-radius: 10px;
 }
-.sp-optgroup{
+
+.sp-optgroup {
     margin-bottom: 20px;
 }
 

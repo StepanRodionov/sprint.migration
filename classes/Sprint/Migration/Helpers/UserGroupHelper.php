@@ -15,21 +15,26 @@ class UserGroupHelper extends Helper
         $res = array();
 
         /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-        $dbRes = \CGroup::GetList($by, $order, $filter);
-        while ($aItem = $dbRes->Fetch()) {
-            $res[] = $this->getGroup($aItem['ID']);
+        $dbres = \CGroup::GetList($by, $order, $filter);
+        while ($item = $dbres->Fetch()) {
+            $res[] = $this->getGroup($item['ID']);
         }
 
         return $res;
     }
 
+    public function getGroupCode($id) {
+        $group = $this->getGroup($id);
+        return ($group) ? $group['STRING_ID'] : false;
+    }
 
     public function getGroupId($code) {
-        return \CGroup::GetIDByCode($code);
+        $group = $this->getGroup($code);
+        return ($group) ? $group['ID'] : false;
     }
 
     public function getGroup($code) {
-        $groupId = is_numeric($code) ? $code : $this->getGroupId($code);
+        $groupId = is_numeric($code) ? $code : \CGroup::GetIDByCode($code);
 
         if (empty($groupId)) {
             return false;
@@ -43,6 +48,12 @@ class UserGroupHelper extends Helper
 
         if (!empty($item['SECURITY_POLICY'])) {
             $item['SECURITY_POLICY'] = unserialize($item['SECURITY_POLICY']);
+        }
+
+        if ($item['ID'] == 1) {
+            $item['STRING_ID'] = 'administrators';
+        } elseif ($item['ID'] == 2) {
+            $item['STRING_ID'] = 'everyone';
         }
 
         return $item;
@@ -76,7 +87,7 @@ class UserGroupHelper extends Helper
         return $this->updateGroup($groupId, $fields);
     }
 
-    protected function addGroup($code, $fields = array()) {
+    public function addGroup($code, $fields = array()) {
         $this->checkRequiredKeys(__METHOD__, $fields, array('NAME'));
 
         $fields['STRING_ID'] = $code;
@@ -91,7 +102,7 @@ class UserGroupHelper extends Helper
         $this->throwException(__METHOD__, $group->LAST_ERROR);
     }
 
-    protected function updateGroup($groupId, $fields = array()) {
+    public function updateGroup($groupId, $fields = array()) {
         if (empty($fields)) {
             $this->throwException(__METHOD__, 'Set fields for group');
         }

@@ -35,11 +35,39 @@ class Helper
 
     protected function checkRequiredKeys($method, $fields, $reqKeys = array()) {
         foreach ($reqKeys as $name) {
-            if (!isset($fields[$name])) {
-                $msg = sprintf('%s: requred key "%s" not found', $this->getMethod($method), $name);
+            if (empty($fields[$name])) {
+                $msg = sprintf('%s: requred key "%s" empty', $this->getMethod($method), $name);
                 Throw new HelperException($msg);
             }
         }
+    }
+
+
+    /**
+     * @param \CDBResult $dbres
+     * @param bool $indexKey
+     * @param bool $valueKey
+     * @return array
+     */
+    protected function fetchAll(\CDBResult $dbres, $indexKey = false, $valueKey = false) {
+        $res = array();
+
+        while ($item = $dbres->Fetch()) {
+            if ($valueKey) {
+                $value = $item[$valueKey];
+            } else {
+                $value = $item;
+            }
+
+            if ($indexKey) {
+                $indexVal = $item[$indexKey];
+                $res[$indexVal] = $value;
+            } else {
+                $res[] = $value;
+            }
+        }
+
+        return $res;
     }
 
     private function getMethod($method) {
