@@ -1,10 +1,9 @@
-<?php
-/**
- * @var $versionManager
- * @var $builderGroup
- */
-?>
 <div class="sp-group"><?
+    /** @var $builderGroup */
+
+    /** @var $versionConfig \Sprint\Migration\VersionConfig */
+    $versionManager = new \Sprint\Migration\VersionManager($versionConfig);
+
     $colIndex = 0;
     $builders = $versionManager->createBuilders(array('group' => $builderGroup)); ?>
     <? foreach ($builders as $bIndex => $builder): ?>
